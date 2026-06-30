@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Prestadores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2 { color: #2c3e50; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover { background-color: #2980b9; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th { background-color: #ecf0f1; }
+        .mensagem {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Controle de Prestadores de Serviço</h1>
+    
+    <h2>Cadastrar Novo Prestador</h2>
+    <form id="formPrestador">
+        <div class="form-group">
+            <label>Nome:</label>
+            <input type="text" id="nome" required>
+        </div>
+        <div class="form-group">
+            <label>E-mail:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label>Senha:</label>
+            <input type="password" id="senha" required>
+        </div>
+        <div class="form-group">
+            <label>Telefone:</label>
+            <input type="text" id="telefone" required>
+        </div>
+        <div class="form-group">
+            <label>Localização:</label>
+            <input type="text" id="localizacao" required>
+        </div>
+        <button type="submit">Cadastrar Prestador</button>
+    </form>
+    <div id="mensagemStatus" class="mensagem"></div>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
+
+    <h2>Prestadores Cadastrados</h2>
+    <button onclick="carregarPrestadores()">Atualizar Lista</button>
+    <table id="tabelaPrestadores">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Localização</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = '/prestadores/';
+
+    async function carregarPrestadores() {
+        try {
+            const resposta = await fetch(API_URL);
+            if (!resposta.ok) throw new Error('Erro ao buscar dados do servidor');
+            
+            const prestadores = await resposta.json();
+            const tbody = document.querySelector('#tabelaPrestadores tbody');
+            tbody.innerHTML = ''; 
+
+            prestadores.forEach(prestador => {
+                const linha = `
+                    <tr>
+                        <td>${prestador.id}</td>
+                        <td>${prestador.nome}</td>
+                        <td>${prestador.email}</td>
+                        <td>${prestador.telefone}</td>
+                        <td>${prestador.localizacao}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += linha;
+            });
+        } catch (erro) {
+            console.error('Erro:', erro);
+        }
+    }
+
+    // Evento para interceptar o envio do formulário (POST)
+    document.getElementById('formPrestador').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Impede a página de recarregar
+
+        const mensagemStatus = document.getElementById('mensagemStatus');
+        
+        // Monta o objeto de acordo com o PrestadorCreate (schemas.py)
+        const dadosPrestador = {
+            nome: document.getElementById('nome').value,
+            email: document.getElementById('email').value,
+            senha: document.getElementById('senha').value,
+            telefone: document.getElementById('telefone').value,
+            localizacao: document.getElementById('localizacao').value
+        };
+
+        try {
+            const resposta = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosPrestador)
+            });
+
+            const resultado = await resposta.json();
+
+            if (resposta.status === 21) { // HTTP 201 CREATED
+                mensagemStatus.style.color = 'green';
+                mensagemStatus.innerText = 'Prestador cadastrado com sucesso!';
+                document.getElementById('formPrestador').reset(); // Limpa o formulário
+                carregarPrestadores(); // Atualiza a tabela automaticamente
+            } else {
+                mensagemStatus.style.color = 'red';
+                mensagemStatus.innerText = resultado.detail || 'Ocorreu um erro ao cadastrar.';
+            }
+        } catch (erro) {
+            mensagemStatus.style.color = 'red';
+            mensagemStatus.innerText = 'Erro de conexão com o servidor.';
+            console.error(erro);
+        }
+    });
+
+    // Executa a listagem assim que a página abre
+    carregarPrestadores();
+</script>
+
+</body>
+</html>
