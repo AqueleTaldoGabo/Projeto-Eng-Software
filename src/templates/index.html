@@ -1,191 +1,290 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Prestadores</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f6f9;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1, h2 { color: #2c3e50; }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        button:hover { background-color: #2980b9; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th { background-color: #ecf0f1; }
-        .mensagem {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Controle de Prestadores de Serviço</h1>
-    
-    <h2>Cadastrar Novo Prestador</h2>
-    <form id="formPrestador">
-        <div class="form-group">
-            <label>Nome:</label>
-            <input type="text" id="nome" required>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ServiçoJá - Plataforma de Serviços</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-bar">
+        <a class="brand" href="#top" aria-label="ServiçoJá">
+          <span class="brand-icon" data-icon="Wrench">W</span>
+          <span>ServiçoJá</span>
+        </a>
+        <nav class="desktop-nav" aria-label="Navegação principal">
+          <a href="#como-funciona">Como funciona</a>
+          <a href="#categorias">Categorias</a>
+          <a href="#prestadores">Prestadores</a>
+          <a href="#seguranca">Segurança</a>
+        </nav>
+        <div class="desktop-actions">
+          <button class="text-button" type="button" id="btn-entrar" onclick="window.abrirModalAuth('login')">Entrar</button>
+          <button class="primary-button small" type="button" id="btn-cadastrar-topo" onclick="window.abrirModalAuth('cadastro')">Cadastrar-se</button>
+          <button class="outline-button small" type="button" id="btn-sair-topo" style="display: none; background: #e63946; color: #fff; border: none;" onclick="document.getElementById('btn-logout').click()">Sair da Conta</button>
         </div>
-        <div class="form-group">
-            <label>E-mail:</label>
-            <input type="email" id="email" required>
+        <button class="icon-button menu-toggle" type="button" aria-label="Abrir menu" onclick="document.getElementById('mobile-menu').classList.toggle('open')">
+          <span data-icon="Menu">☰</span>
+        </button>
+      </div>
+      <div class="mobile-menu" id="mobile-menu">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#categorias">Categorias</a>
+        <a href="#prestadores">Prestadores</a>
+        <a href="#seguranca">Segurança</a>
+        <div class="mobile-actions">
+          <button type="button" class="outline-button" onclick="window.abrirModalAuth('login')">Entrar</button>
+          <button type="button" class="primary-button" onclick="window.abrirModalAuth('cadastro')">Cadastrar-se</button>
         </div>
-        <div class="form-group">
-            <label>Senha:</label>
-            <input type="password" id="senha" required>
-        </div>
-        <div class="form-group">
-            <label>Telefone:</label>
-            <input type="text" id="telefone" required>
-        </div>
-        <div class="form-group">
-            <label>Localização:</label>
-            <input type="text" id="localizacao" required>
-        </div>
-        <button type="submit">Cadastrar Prestador</button>
-    </form>
-    <div id="mensagemStatus" class="mensagem"></div>
+      </div>
+    </header>
 
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
-
-    <h2>Prestadores Cadastrados</h2>
-    <button onclick="carregarPrestadores()">Atualizar Lista</button>
-    <table id="tabelaPrestadores">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Telefone</th>
-                <th>Localização</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
-</div>
-
-<script>
-    const API_URL = '/prestadores/';
-
-    async function carregarPrestadores() {
-        try {
-            const resposta = await fetch(API_URL);
-            if (!resposta.ok) throw new Error('Erro ao buscar dados do servidor');
+    <main id="top">
+      <!-- SEÇÃO HERO ORIGINAL COM O FORMULÁRIO DINÂMICO EMBUTIDO -->
+      <section class="hero section-dark">
+        <div class="hero-glow glow-primary"></div>
+        <div class="hero-glow glow-accent"></div>
+        <div class="container hero-content">
+          <div class="hero-copy">
+            <div class="status-pill">
+              <span></span>
+              +18.500 prestadores verificados no Brasil
+            </div>
             
-            const prestadores = await resposta.json();
-            const tbody = document.querySelector('#tabelaPrestadores tbody');
-            tbody.innerHTML = ''; 
+            <h1>O serviço que<br><span>você precisa,</span><br>perto de você.</h1>
+            
+            <!-- BLOCO DE ATENDIMENTO EXCLUSIVO DO PRESTADOR LOGADO -->
+            <div id="painel-prestador" style="display: none; margin: 1.5rem 0; padding: 1rem 0;">
+              <p style="text-transform: uppercase; letter-spacing: 1px; color: var(--primary); font-weight: bold; margin-bottom: 0.25rem;">Área Logada</p>
+              <h2 style="color: #fff; font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 800;">Olá, <span id="nome-prestador-logado" style="color: #fff;">Prestador</span>!</h2>
+              <p style="color: #aaa; margin-bottom: 1.5rem;">Cadastre um novo serviço no seu perfil corporativo abaixo.</p>
+              
+              <form class="search-card" id="form-criar-servico">
+                <label>
+                  <input id="servico-descricao" type="text" placeholder="Descrição (Ex: Pintura Residencial)" required />
+                </label>
+                <div class="divider"></div>
+                <label style="max-width: 130px;">
+                  <input id="servico-preco" type="number" placeholder="Preço (R$)" step="0.01" required />
+                </label>
+                <div class="divider"></div>
+                <label style="max-width: 150px;">
+                  <input id="servico-tempo" type="text" placeholder="Tempo (Ex: 4h)" required />
+                </label>
+                <button type="submit" class="primary-button">
+                  Publicar Serviço
+                </button>
+              </form>
+            </div>
 
-            prestadores.forEach(prestador => {
-                const linha = `
-                    <tr>
-                        <td>${prestador.id}</td>
-                        <td>${prestador.nome}</td>
-                        <td>${prestador.email}</td>
-                        <td>${prestador.telefone}</td>
-                        <td>${prestador.localizacao}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += linha;
-            });
-        } catch (erro) {
-            console.error('Erro:', erro);
-        }
-    }
+            <!-- FORMULÁRIO PADRÃO DE BUSCA -->
+            <form class="search-card" id="hero-search">
+              <label>
+                <span data-icon="Search"></span>
+                <input id="search-query" type="search" placeholder="Qual serviço você precisa?" />
+              </label>
+              <div class="divider"></div>
+              <label>
+                <span data-icon="MapPin"></span>
+                <input id="search-location" type="search" placeholder="Sua cidade ou bairro" />
+              </label>
+              <button type="submit" class="primary-button">Buscar</button>
+            </form>
 
-    // Evento para interceptar o envio do formulário (POST)
-    document.getElementById('formPrestador').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Impede a página de recarregar
+            <p id="hero-desc-texto" style="margin-top: 1.5rem;">Conectamos você aos melhores profissionais da sua região - de eletricistas a designers, com agendamento, chat e pagamento em um só lugar.</p>
+            <div class="quick-tags" id="quick-tags"></div>
+          </div>
+        </div>
+        <div class="container stats-grid" id="stats-grid"></div>
+      </section>
 
-        const mensagemStatus = document.getElementById('mensagemStatus');
-        
-        // Monta o objeto de acordo com o PrestadorCreate (schemas.py)
-        const dadosPrestador = {
-            nome: document.getElementById('nome').value,
-            email: document.getElementById('email').value,
-            senha: document.getElementById('senha').value,
-            telefone: document.getElementById('telefone').value,
-            localizacao: document.getElementById('localizacao').value
-        };
+      <!-- Botão oculto para manter o gatilho de Logout ativo -->
+      <button id="btn-logout" type="button" style="display: none;"></button>
 
-        try {
-            const resposta = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dadosPrestador)
-            });
+      <!-- SEÇÃO COMO FUNCIONA -->
+      <section id="como-funciona" class="content-section">
+        <div class="container">
+          <div class="section-heading centered">
+            <p>Plataforma</p>
+            <h2>Como funciona</h2>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Tipo de usuario">
+            <button class="tab active" type="button" data-tab="cliente">Sou Cliente</button>
+            <button class="tab" type="button" data-tab="prestador">Sou Prestador</button>
+          </div>
+          <div class="steps-grid" id="steps-grid"></div>
+          <div class="center-action">
+            <button class="dark-button" type="button" id="steps-cta">
+              <span>Buscar um serviço agora</span>
+              <span data-icon="ArrowRight">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
-            const resultado = await resposta.json();
+      <!-- SEÇÃO CATEGORIAS -->
+      <section id="categorias" class="content-section section-dark categories-section">
+        <div class="container">
+          <div class="section-heading row-heading">
+            <div>
+              <p>Explore</p>
+              <h2>Categorias de serviço</h2>
+            </div>
+            <button class="link-button light" type="button">
+              Ver todas as categorias
+              <span data-icon="ChevronRight"></span>
+            </button>
+          </div>
+          <div class="category-grid" id="category-grid"></div>
+        </div>
+      </section>
 
-            if (resposta.status === 21) { // HTTP 201 CREATED
-                mensagemStatus.style.color = 'green';
-                mensagemStatus.innerText = 'Prestador cadastrado com sucesso!';
-                document.getElementById('formPrestador').reset(); // Limpa o formulário
-                carregarPrestadores(); // Atualiza a tabela automaticamente
-            } else {
-                mensagemStatus.style.color = 'red';
-                mensagemStatus.innerText = resultado.detail || 'Ocorreu um erro ao cadastrar.';
-            }
-        } catch (erro) {
-            mensagemStatus.style.color = 'red';
-            mensagemStatus.innerText = 'Erro de conexão com o servidor.';
-            console.error(erro);
-        }
-    });
+      <!-- SEÇÃO PRESTADORES -->
+      <section id="prestadores" class="content-section">
+        <div class="container">
+          <div class="section-heading centered">
+            <p>Profissionais</p>
+            <h2>Prestadores em destaque</h2>
+            <span>Profissionais verificados com avaliações excelentes e histórico comprovado.</span>
+          </div>
+          <div class="provider-grid" id="provider-grid"></div>
+          <div class="center-action">
+            <button class="outline-button dark-text" type="button">
+              Ver todos os prestadores
+              <span data-icon="ChevronRight"></span>
+            </button>
+          </div>
+        </div>
+      </section>
 
-    // Executa a listagem assim que a página abre
-    carregarPrestadores();
-</script>
+      <!-- SEÇÃO TUDO QUE VOCÊ PRECISA -->
+      <section class="content-section feature-section">
+        <div class="container">
+          <div class="section-heading centered">
+            <p>Plataforma completa</p>
+            <h2>Tudo que você precisa</h2>
+            <span>20 funcionalidades desenvolvidas para tornar a contratação de serviços simples, segura e eficiente.</span>
+          </div>
+          <div class="feature-grid" id="feature-grid"></div>
+        </div>
+      </section>
 
-</body>
+      <!-- SEÇÃO SEGURANÇA -->
+      <section id="seguranca" class="content-section">
+        <div class="container security-layout">
+          <div>
+            <div class="section-heading">
+              <p>Proteção total</p>
+              <h2>Segurança em<br>cada etapa</h2>
+            </div>
+            <p class="security-intro">Construímos uma plataforma onde clientes e prestadores operam com total confiança. Verificações rigorosas, dados criptografados e políticas claras em cada interação.</p>
+            <div class="security-list" id="security-list"></div>
+          </div>
+          <div class="quality-wrap">
+            <div class="quality-card">
+              <h3>Conformidade<br>& Qualidade</h3>
+              <div id="quality-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO DEPOIMENTOS -->
+      <section class="content-section section-dark testimonials-section">
+        <div class="container">
+          <div class="section-heading centered">
+            <p>Depoimentos</p>
+            <h2>O que dizem sobre nós</h2>
+          </div>
+          <div class="testimonial-grid" id="testimonial-grid"></div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO CTA FINAL -->
+      <section class="cta-section">
+        <div class="cta-glow"></div>
+        <div class="container cta-content">
+          <h2>Pronto para começar?</h2>
+          <p>Crie sua conta gratuitamente e encontre o profissional certo para o seu projeto hoje mesmo.</p>
+          <div class="cta-actions">
+            <button class="white-button" type="button" onclick="window.abrirModalAuth('cadastro', 'cliente')">
+              Cadastrar como Cliente
+            </button>
+            <button class="ghost-button" type="button" onclick="window.abrirModalAuth('cadastro', 'prestador')">
+              Cadastrar como Prestador
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="#top">
+              <span class="brand-icon" data-icon="Wrench">W</span>
+              <span>ServiçoJá</span>
+            </a>
+            <p>A maior plataforma de serviços gerais do Brasil. Conectando pessoas e profissionais de forma segura e eficiente.</p>
+          </div>
+          <div class="footer-column">
+            <h3>Plataforma</h3>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#categorias">Categorias</a>
+            <a href="#prestadores">Prestadores</a>
+          </div>
+          <div class="footer-column">
+            <h3>Suporte</h3>
+            <a href="#">Central de Ajuda</a>
+            <a href="#">Fale Conosco</a>
+          </div>
+          <div class="footer-column">
+            <h3>Legal</h3>
+            <a href="#">Termos de Uso</a>
+            <a href="#">Política de Privacidade</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 ServiçoJá. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- MODAL ÚNICO DE AUTENTICAÇÃO -->
+    <div class="modal-root" id="auth-modal" aria-hidden="true">
+      <div class="modal-overlay" onclick="window.fecharModalAuth()"></div>
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="auth-modal-title">Entrar na Conta</h3>
+          </div>
+          <button type="button" class="modal-close" onclick="window.fecharModalAuth()">&times;</button>
+        </div>
+        <div style="padding: 0 1.5rem;">
+          <div class="tabs" style="display: flex; gap: 4px; margin-bottom: 0.5rem;">
+            <button class="tab active" id="tab-modo-login" type="button" style="flex: 1;" onclick="window.mudarModoAuth('login')">Entrar</button>
+            <button class="tab" id="tab-modo-cadastro" type="button" style="flex: 1;" onclick="window.mudarModoAuth('cadastro')">Criar Conta</button>
+          </div>
+          <div class="tabs" style="display: flex; gap: 4px; background: #f0edf5; padding: 0.25rem; border-radius: 6px;">
+            <button class="tab active" id="tab-tipo-cliente" type="button" style="flex: 1;" onclick="window.mudarTipoPerfil('cliente')">Sou Cliente</button>
+            <button class="tab" id="tab-tipo-prestador" type="button" style="flex: 1;" onclick="window.mudarTipoPerfil('prestador')">Sou Prestador</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <form id="form-auth-sistema" style="display: grid; gap: 1rem;">
+            <div class="field" id="campo-auth-nome" style="display: none;"><label>Nome Completo</label><input type="text" id="auth-nome" /></div>
+            <div class="field" id="campo-auth-telefone" style="display: none;"><label>Telefone</label><input type="text" id="auth-telefone" /></div>
+            <div class="field" id="campo-auth-localizacao" style="display: none;"><label>Localização</label><input type="text" id="auth-localizacao" /></div>
+            <div class="field"><label id="label-auth-email">E-mail</label><input type="email" id="auth-email" required /></div>
+            <div class="field"><label>Senha</label><input type="password" id="auth-senha" required /></div>
+            <button type="submit" class="primary-button" id="btn-auth-enviar" style="width: 100%;">Entrar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+  </body>
 </html>

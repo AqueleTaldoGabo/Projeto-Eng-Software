@@ -1,7 +1,5 @@
 from src.database import Base
-# pyrefly: ignore [missing-import]
 from sqlalchemy import Column, Integer, String, TIMESTAMP, text
-# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
 
 

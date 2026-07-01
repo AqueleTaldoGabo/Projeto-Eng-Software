@@ -1,4 +1,3 @@
-
 from fastapi import HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from starlette import status
@@ -69,3 +68,17 @@ def atualizar_prestador(update_dados: schemas.PrestadorBase, id: int, db: Sessio
     query_atualizar.update(update_dados.dict(), synchronize_session=False)
     db.commit()
     return query_atualizar.first()
+
+@router.post('/login/', response_model=schemas.PrestadorResponse)
+def login_prestador(dados_login: schemas.SchemaLogin, db: Session = Depends(get_db)):
+    prestador = db.query(Prestador).filter(
+        Prestador.email == dados_login.email, 
+        Prestador.senha == dados_login.senha
+    ).first()
+    
+    if not prestador:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="E-mail ou senha incorretos."
+        )
+    return prestador

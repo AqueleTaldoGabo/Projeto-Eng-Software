@@ -20,6 +20,7 @@
           pkgs.python313Packages.sqlalchemy
           pkgs.python313Packages.psycopg2
           pkgs.python313Packages.jinja2
+          pkgs.python313Packages.email-validator
           pkgs.docker
           pkgs.docker-compose
           pkgs.dbeaver-bin

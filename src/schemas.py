@@ -14,6 +14,8 @@ class ServicoCreate(ServicoBase):
 
 class ServicoResponse(ServicoBase):
     id: int
+    avaliacao: float
+    quantavaliacao: int
     created_at: datetime
 
     class Config:
@@ -54,3 +56,10 @@ class ClienteResponse(ClienteBase):
 
     class Config:
         from_attributes = True
+
+class AvaliacaoInput(BaseModel):
+    nota: float 
+
+class SchemaLogin(BaseModel):
+    email: EmailStr  
+    senha: str

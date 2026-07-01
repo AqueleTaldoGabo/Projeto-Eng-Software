@@ -64,4 +64,17 @@ def atualizar_cliente(update_dados: schemas.ClienteBase, id: int, db: Session = 
     query_atualizar.update(update_dados.dict(), synchronize_session=False)
     db.commit()
     return query_atualizar.first()
-    from typing import List
+
+@router.post('/login/', response_model=schemas.ClienteResponse)
+def login_cliente(dados_login: schemas.SchemaLogin, db: Session = Depends(get_db)):
+    cliente = db.query(Cliente).filter(
+        Cliente.email == dados_login.email, 
+        Cliente.senha == dados_login.senha
+    ).first()
+    
+    if not cliente:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="E-mail ou senha incorretos."
+        )
+    return cliente

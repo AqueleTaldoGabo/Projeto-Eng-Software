@@ -1,14 +1,12 @@
 from typing import List
-# pyrefly: ignore [missing-import]
 from fastapi import HTTPException, Depends, APIRouter
-# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
-# pyrefly: ignore [missing-import]
 from starlette import status
 
 from src.database import get_db
 from src import schemas
 from src.entities.Servico import Servico
+from src.entities.Prestador import Prestador
 
 router = APIRouter(
     prefix='/servicos',
@@ -21,8 +19,16 @@ def listar_servicos(db: Session = Depends(get_db)):
     return servicos
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ServicoResponse)
+@router.post('/')
 def criar_servico(servico_in: schemas.ServicoCreate, db: Session = Depends(get_db)):
+    prestador_existe = db.query(Prestador).filter(Prestador.id == servico_in.prestador_id).first()
+    
+    if not prestador_existe:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Ação negada: Apenas prestadores de serviços válidos podem criar um serviço."
+        )
+
     novo_servico = Servico(**servico_in.dict())
     db.add(novo_servico)
     db.commit()
@@ -70,3 +76,33 @@ def atualizar_servico(update_dados: schemas.ServicoBase, id: int, db: Session = 
     db.commit()
 
     return query_atualizar.first()
+
+@router.post('/{id}/avaliar', status_code=status.HTTP_200_OK)
+def avaliar_servico(id: int, dados: schemas.AvaliacaoInput, db: Session = Depends(get_db)):
+    if dados.nota < 1 or dados.nota > 5:
+        raise HTTPException(status_code=400, detail="A nota deve ser entre 1 e 5")
+
+    servico = db.query(Servico).filter(Servico.id == id).first()
+    if not servico:
+        raise HTTPException(status_code=404, detail="Serviço não encontrado")
+
+    qtd_atual = servico.quantavaliacao or 0
+    media_atual = servico.avaliacao or 0.0
+
+    somatorio_antigo = media_atual * qtd_atual
+    novo_somatorio = somatorio_antigo + dados.nota
+    
+    nova_qtd = qtd_atual + 1
+    nova_media = novo_somatorio / nova_qtd
+
+    servico.quantavaliacao = nova_qtd
+    servico.avaliacao = round(nova_media, 2) 
+
+    db.commit()
+    db.refresh(servico)
+
+    return {
+        "message": "Avaliação enviada com sucesso!",
+        "nova_media": servico.avaliacao,
+        "total_avaliacoes": servico.quantavaliacao
+    }
